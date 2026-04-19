@@ -8,17 +8,31 @@ const app = express();
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
-const uploadMiddleware = multer({ dest: 'uploads/' });
-const fs = require('fs');
 const dotenv=require("dotenv");
 dotenv.config();
 const salt = bcrypt.genSaltSync(10);
 const secret =process.env.SECRET ;
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const PORT = process.env.PORT || 4000;
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
+});
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'posts',
+    allowed_formats: ['jpg', 'png', 'jpeg'],
+  },
+});
+
+const uploadMiddleware = multer({ storage });
 
 app.use(cors({credentials:true,origin:process.env.CLIENT_URL}));
 app.use(express.json());
 app.use(cookieParser());
-app.use('/uploads', express.static(__dirname + '/uploads'));
 
 async function connectToDatabase() {
   try {
@@ -82,11 +96,7 @@ app.post('/logout', (req,res) => {
 });
 
 app.post('/post', uploadMiddleware.single('file'), async (req, res) => {
-  const { originalname, path } = req.file;
-  const parts = originalname.split('.');
-  const ext = parts[parts.length - 1];
-  const newPath = path + '.' + ext;
-  fs.renameSync(path, newPath);
+const imageUrl = req.file.path; // Cloudinary URL
 
   const { token } = req.cookies;
   if (!token) {
@@ -102,7 +112,7 @@ app.post('/post', uploadMiddleware.single('file'), async (req, res) => {
       title,
       summary,
       content,
-      cover: newPath,
+      cover: imageUrl,
       author: info.id,
     });
     res.json(postDoc);
@@ -110,14 +120,11 @@ app.post('/post', uploadMiddleware.single('file'), async (req, res) => {
 });
 
 app.put('/post', uploadMiddleware.single('file'), async (req, res) => {
-  let newPath = null;
-  if (req.file) {
-    const { originalname, path } = req.file;
-    const parts = originalname.split('.');
-    const ext = parts[parts.length - 1];
-    newPath = path + '.' + ext;
-    fs.renameSync(path, newPath);
-  }
+let newPath = null;
+
+if (req.file) {
+  newPath = req.file.path; // ✅ save Cloudinary URL
+}
 
   const { token } = req.cookies;
   if (!token) {
@@ -160,5 +167,21 @@ app.get('/post/:id', async (req, res) => {
   res.json(postDoc);
 })
 
-app.listen(4000);
-// 
+app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
+
+const startServer = async () => {
+  try {
+    if (process.env.NODE_ENV !== "production") {
+      app.listen(PORT, () => {
+        console.log("Server started on port:", PORT);
+      });
+    }
+  } catch (error) {
+    console.error("Error starting server:", error);
+    process.exit(1); // Exit the process with a failure code
+  }
+};
+
+startServer();
+
+export default app;

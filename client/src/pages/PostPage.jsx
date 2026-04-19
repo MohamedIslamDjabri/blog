@@ -18,6 +18,7 @@ export default function PostPage() {
   }, []);
 
   if (!postInfo) return '';
+  console.log(postInfo.cover);
 
   return (
     <div className="post-page">
@@ -35,7 +36,7 @@ export default function PostPage() {
         </div>
       )}
       <div className="image">
-        <img src={`${import.meta.env.VITE_API_BASE_URL}/${postInfo.cover}`} alt=""/>
+        <img src={postInfo.cover} alt=""/>
       </div>
       <div className="content" dangerouslySetInnerHTML={{__html:postInfo.content}} />
     </div>
