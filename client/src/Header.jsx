@@ -5,7 +5,7 @@ import {UserContext} from "./UserContext";
 export default function Header() {
   const {setUserInfo,userInfo} = useContext(UserContext);
   useEffect(() => {
-    fetch('https://blog-it9c.onrender.com/profile', {
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/profile`, {
       credentials: 'include',
     }).then(response => {
       response.json().then(userInfo => {
@@ -15,7 +15,7 @@ export default function Header() {
   }, []);
 
   function logout() {
-    fetch('https://blog-it9c.onrender.com/logout', {
+    fetch(`${VITE_API_BASE_URL}/logout`, {
       credentials: 'include',
       method: 'POST',
     });

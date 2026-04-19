@@ -9,7 +9,7 @@ export default function PostPage() {
   const {userInfo} = useContext(UserContext);
   const {id} = useParams();
   useEffect(() => {
-    fetch(`https://blog-it9c.onrender.com/post/${id}`)
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/post/${id}`)
       .then(response => {
         response.json().then(postInfo => {
           setPostInfo(postInfo);
@@ -35,7 +35,7 @@ export default function PostPage() {
         </div>
       )}
       <div className="image">
-        <img src={`https://blog-it9c.onrender.com/${postInfo.cover}`} alt=""/>
+        <img src={`${import.meta.env.VITE_API_BASE_URL}/${postInfo.cover}`} alt=""/>
       </div>
       <div className="content" dangerouslySetInnerHTML={{__html:postInfo.content}} />
     </div>

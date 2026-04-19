@@ -9,7 +9,7 @@ export default function LoginPage() {
   const {setUserInfo} = useContext(UserContext);
   async function login(ev) {
     ev.preventDefault();
-    const response = await fetch('https://blog-it9c.onrender.com/login', {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/login`, {
       method: 'POST',
       body: JSON.stringify({username, password}),
       headers: {'Content-Type':'application/json'},

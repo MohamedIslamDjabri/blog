@@ -4,7 +4,7 @@ import {useEffect, useState} from "react";
 export default function IndexPage() {
   const [posts,setPosts] = useState([]);
   useEffect(() => {
-    fetch('https://blog-it9c.onrender.com/post').then(response => {
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/post`).then(response => {
       response.json().then(posts => {
         setPosts(posts);
       });
